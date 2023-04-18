@@ -130,6 +130,7 @@ const magnetAvailabilityHighlighter = {
 // 画布
 const graph = new Graph({
   container: document.getElementById('container'),
+  clipboard: true,  // 剪切板
   background: {
     color: '#fffbe6', // 设置画布背景颜色
   },
