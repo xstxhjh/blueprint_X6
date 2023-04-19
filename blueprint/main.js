@@ -1,96 +1,132 @@
 const { Graph, Edge, Shape, NodeView } = window.X6
 
-const LINE_HEIGHT = 24
-const NODE_WIDTH = 150
+// 定义节点
+class MyShape extends Shape.Rect {
+  getInPorts() {
+    return this.getPortsByGroup('in')
+  }
 
-Graph.registerPortLayout(
-  'erPortPosition',
-  (portsPositionArgs) => {
-    return portsPositionArgs.map((_, index) => {
-      return {
-        position: {
-          x: 0,
-          y: (index + 1) * LINE_HEIGHT,
-        },
-        angle: 0,
-      }
+  getOutPorts() {
+    return this.getPortsByGroup('out')
+  }
+
+  getUsedInPorts(graph) {
+    const incomingEdges = graph.getIncomingEdges(this) || []
+    return incomingEdges.map((edge) => {
+      const portId = edge.getTargetPortId()
+      return this.getPort(portId)
     })
-  },
-  true,
-)
+  }
 
-Graph.registerNode(
-  'er-rect',
-  {
-    inherit: 'rect',
-    markup: [
+  getNewInPorts(length) {
+    return Array.from(
       {
-        tagName: 'rect',
-        selector: 'body',
+        length,
       },
+      () => {
+        return {
+          group: 'in',
+        }
+      },
+    )
+  }
+
+  updateInPorts(graph) {
+    const minNumberOfPorts = 2
+    const ports = this.getInPorts()
+    const usedPorts = this.getUsedInPorts(graph)
+    const newPorts = this.getNewInPorts(
+      Math.max(minNumberOfPorts - usedPorts.length, 1),
+    )
+
+    if (
+      ports.length === minNumberOfPorts &&
+      ports.length - usedPorts.length > 0
+    ) {
+      // noop
+    } else if (ports.length === usedPorts.length) {
+      this.addPorts(newPorts)
+    } else if (ports.length + 1 > usedPorts.length) {
+      this.prop(
+        ['ports', 'items'],
+        this.getOutPorts().concat(usedPorts).concat(newPorts),
+        {
+          rewrite: true,
+        },
+      )
+    }
+
+    return this
+  }
+}
+
+MyShape.config({
+  label: 'hahaha',
+  attrs: {
+    root: {
+      magnet: false,
+    },
+    body: {
+      fill: '#EFF4FF',
+      stroke: '#5F95FF',
+      strokeWidth: 1,
+    },
+  },
+  ports: {
+    items: [  // 链接桩
       {
-        tagName: 'text',
-        selector: 'label',
+        group: 'out',
       },
     ],
-    attrs: {
-      rect: {
-        strokeWidth: 1,
-        stroke: '#5F95FF',
-        fill: '#5F95FF',
-      },
-      label: {
-        fontWeight: 'bold',
-        fill: '#ffffff',
-        fontSize: 12,
-      },
-    },
-    ports: {
-      groups: {
-        list: {
-          markup: [
-            {
-              tagName: 'rect',
-              selector: 'portBody',
-            },
-            {
-              tagName: 'text',
-              selector: 'portNameLabel',
-            },
-            {
-              tagName: 'text',
-              selector: 'portTypeLabel',
-            },
-          ],
-          attrs: {
-            portBody: {
-              width: NODE_WIDTH,
-              height: LINE_HEIGHT,
-              strokeWidth: 1,
-              stroke: '#5F95FF',
-              fill: '#EFF4FF',
-              magnet: true,
-            },
-            portNameLabel: {
-              ref: 'portBody',
-              refX: 6,
-              refY: 6,
-              fontSize: 10,
-            },
-            portTypeLabel: {
-              ref: 'portBody',
-              refX: 95,
-              refY: 6,
-              fontSize: 10,
-            },
+    groups: { // 链接桩组定义
+      in: {
+        position: {
+          name: 'right',
+        },
+        attrs: {
+          portBody: {
+            magnet: 'passive',
+            r: 4,
+            stroke: '#5F95FF',
+            fill: '#fff',
+            strokeWidth: 1,
           },
-          position: 'erPortPosition',
+        },
+      },
+      out: {
+        position: {
+          name: 'left',
+        },
+        attrs: {
+          portBody: {
+            magnet: true,  // 链接桩在连线交互时可以被连接上
+            r: 4,
+            fill: '#fff',
+            stroke: '#5F95FF',
+            strokeWidth: 1,
+          },
         },
       },
     },
   },
-  true,
-)
+  portMarkup: [
+    {
+      tagName: 'circle',
+      selector: 'portBody',
+    },
+  ],
+})
+
+// 高亮
+const magnetAvailabilityHighlighter = {
+  name: 'stroke',
+  args: {
+    attrs: {
+      fill: '#fff',
+      stroke: '#47C769',
+    },
+  },
+}
 
 // 画布
 const graph = new Graph({
@@ -104,15 +140,7 @@ const graph = new Graph({
     visible: true, // 渲染网格背景
   },
   highlighting: {
-    magnetAvailable: {
-      name: 'stroke',
-      args: {
-        attrs: {
-          fill: '#fff',
-          stroke: '#47C769',
-        },
-      },
-    },
+    magnetAvailable: magnetAvailabilityHighlighter,
     magnetAdsorbed: {
       name: 'stroke',
       args: {
@@ -175,240 +203,67 @@ const graph = new Graph({
   },
 })
 
-const init = () => {
-  const data = [
-    {
-      "id": "1",
-      "shape": "er-rect",
-      "label": "学生",
-      "width": 150,
-      "height": 24,
-      "position": {
-        "x": 24,
-        "y": 150
-      },
-      "ports": [
-        {
-          "id": "1-1",
-          "group": "list",
-          "attrs": {
-            "portNameLabel": {
-              "text": "ID"
-            },
-            "portTypeLabel": {
-              "text": "STRING"
-            }
-          }
-        },
-        {
-          "id": "1-2",
-          "group": "list",
-          "attrs": {
-            "portNameLabel": {
-              "text": "Name"
-            },
-            "portTypeLabel": {
-              "text": "STRING"
-            }
-          }
-        },
-        {
-          "id": "1-3",
-          "group": "list",
-          "attrs": {
-            "portNameLabel": {
-              "text": "Class"
-            },
-            "portTypeLabel": {
-              "text": "NUMBER"
-            }
-          }
-        },
-        {
-          "id": "1-4",
-          "group": "list",
-          "attrs": {
-            "portNameLabel": {
-              "text": "Gender"
-            },
-            "portTypeLabel": {
-              "text": "BOOLEAN"
-            }
-          }
-        }
-      ]
-    },
-    {
-      "id": "2",
-      "shape": "er-rect",
-      "label": "课程",
-      "width": 150,
-      "height": 24,
-      "position": {
-        "x": 250,
-        "y": 210
-      },
-      "ports": [
-        {
-          "id": "2-1",
-          "group": "list",
-          "attrs": {
-            "portNameLabel": {
-              "text": "ID"
-            },
-            "portTypeLabel": {
-              "text": "STRING"
-            }
-          }
-        },
-        {
-          "id": "2-2",
-          "group": "list",
-          "attrs": {
-            "portNameLabel": {
-              "text": "Name"
-            },
-            "portTypeLabel": {
-              "text": "STRING"
-            }
-          }
-        },
-        {
-          "id": "2-3",
-          "group": "list",
-          "attrs": {
-            "portNameLabel": {
-              "text": "StudentID"
-            },
-            "portTypeLabel": {
-              "text": "STRING"
-            }
-          }
-        },
-        {
-          "id": "2-4",
-          "group": "list",
-          "attrs": {
-            "portNameLabel": {
-              "text": "TeacherID"
-            },
-            "portTypeLabel": {
-              "text": "STRING"
-            }
-          }
-        },
-        {
-          "id": "2-5",
-          "group": "list",
-          "attrs": {
-            "portNameLabel": {
-              "text": "Description"
-            },
-            "portTypeLabel": {
-              "text": "STRING"
-            }
-          }
-        }
-      ]
-    },
-    {
-      "id": "3",
-      "shape": "er-rect",
-      "label": "老师",
-      "width": 150,
-      "height": 24,
-      "position": {
-        "x": 480,
-        "y": 350
-      },
-      "ports": [
-        {
-          "id": "3-1",
-          "group": "list",
-          "attrs": {
-            "portNameLabel": {
-              "text": "ID"
-            },
-            "portTypeLabel": {
-              "text": "STRING"
-            }
-          }
-        },
-        {
-          "id": "3-2",
-          "group": "list",
-          "attrs": {
-            "portNameLabel": {
-              "text": "Name"
-            },
-            "portTypeLabel": {
-              "text": "STRING"
-            }
-          }
-        },
-        {
-          "id": "3-3",
-          "group": "list",
-          "attrs": {
-            "portNameLabel": {
-              "text": "Age"
-            },
-            "portTypeLabel": {
-              "text": "NUMBER"
-            }
-          }
-        }
-      ]
-    },
-    {
-      "id": "4",
-      "shape": "edge",
-      "source": {
-        "cell": "1",
-        "port": "1-1"
-      },
-      "target": {
-        "cell": "2",
-        "port": "2-3"
-      },
-      "attrs": {
-        "line": {
-          "stroke": "#A2B1C3",
-          "strokeWidth": 2
-        }
-      },
-      "zIndex": 0
-    },
-    {
-      "id": "5",
-      "shape": "edge",
-      "source": {
-        "cell": "3",
-        "port": "3-1"
-      },
-      "target": {
-        "cell": "2",
-        "port": "2-4"
-      },
-      "attrs": {
-        "line": {
-          "stroke": "#A2B1C3",
-          "strokeWidth": 2
-        }
-      },
-      "zIndex": 0
-    }
-  ]
-  const cells = []
-  data.forEach((item) => {
-    if (item.shape === 'edge') {
-      cells.push(graph.createEdge(item))
-    } else {
-      cells.push(graph.createNode(item))
-    }
-  })
-  graph.resetCells(cells)
-  graph.zoomToFit({ padding: 10, maxScale: 1 })
+const node = new MyShape()
+
+node.resize(120, 240).position(200, 50).updateInPorts(graph)
+graph.addNode(
+  node
+)
+
+graph.addNode(
+  new MyShape().resize(120, 360).position(400, 50).updateInPorts(graph),
+)
+
+graph.addNode(
+  new MyShape().resize(120, 360).position(300, 250).updateInPorts(graph),
+)
+
+function update(view) {
+  const cell = view.cell
+  if (cell instanceof MyShape) {
+    cell.getInPorts().forEach((port) => {
+      const portNode = view.findPortElem(port.id, 'portBody')
+      view.unhighlight(portNode, {
+        highlighter: magnetAvailabilityHighlighter,
+      })
+    })
+    cell.updateInPorts(graph)
+  }
 }
 
-init()
+graph.on('edge:connected', ({ previousView, currentView }) => {
+  if (previousView) {
+    update(previousView)
+  }
+  if (currentView) {
+    update(currentView)
+  }
+})
+
+graph.on('edge:removed', ({ edge, options }) => {
+  if (!options.ui) {
+    return
+  }
+
+  const target = edge.getTargetCell()
+  if (target instanceof MyShape) {
+    target.updateInPorts(graph)
+  }
+})
+
+graph.on('edge:mouseenter', ({ edge }) => {
+  edge.addTools([
+    'source-arrowhead',
+    'target-arrowhead',
+    {
+      name: 'button-remove',
+      args: {
+        distance: -30,
+      },
+    },
+  ])
+})
+
+graph.on('edge:mouseleave', ({ edge }) => {
+  edge.removeTools()
+})
