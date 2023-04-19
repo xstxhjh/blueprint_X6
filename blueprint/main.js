@@ -80,8 +80,8 @@ MyShape.config({
     },
     body: {
       fill: '#EFF4FF',
-      stroke: '#5F95FF',
-      strokeWidth: 1,
+      stroke: '#EFF4FF',
+      strokeWidth: 0,
     },
   },
   ports: {
@@ -190,6 +190,7 @@ graph.on('edge:mouseleave', ({ edge }) => {
 
 
 const createBox = (x = 80, y = 40)=>{
+  const strokeWidth = 1;
   const parent = graph.addNode({
     x: x,
     y: y,
@@ -200,6 +201,7 @@ const createBox = (x = 80, y = 40)=>{
       body: {
         fill: '#2ECC71', // 背景颜色
         stroke: '#000',  // 边框颜色
+        strokeWidth: strokeWidth,
       },
       text: {
         text: 'this is content text',
@@ -211,13 +213,12 @@ const createBox = (x = 80, y = 40)=>{
   })
   
   const node = new MyShape()
-  node.resize(NODE_WIDTH, LINE_HEIGHT).position(x, y + LINE_HEIGHT).updateInPorts(graph)
+  node.resize(NODE_WIDTH - strokeWidth * 2, LINE_HEIGHT).position(x + strokeWidth, y + LINE_HEIGHT).updateInPorts(graph)
   graph.addNode(node)
   parent.addChild(node)
   
 }
 
 createBox()
-
 
 export { MyShape }
