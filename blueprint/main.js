@@ -1,7 +1,14 @@
 const { Graph, Edge, Shape, NodeView } = window.X6
 
+import { graph } from './graph.js'
+
 // 定义节点
 class MyShape extends Shape.Rect {
+  constructor(props) {
+    super(props)
+    this.keyName = 'MyShape'
+  }
+
   getInPorts() {
     return this.getPortsByGroup('in')
   }
@@ -62,6 +69,9 @@ class MyShape extends Shape.Rect {
 
 MyShape.config({
   label: 'hahaha',
+  data: {
+    disableMove: true
+  },
   attrs: {
     root: {
       magnet: false,
@@ -117,114 +127,21 @@ MyShape.config({
   ],
 })
 
-// 高亮
-const magnetAvailabilityHighlighter = {
-  name: 'stroke',
-  args: {
-    attrs: {
-      fill: '#fff',
-      stroke: '#47C769',
-    },
-  },
-}
-
-// 画布
-const graph = new Graph({
-  container: document.getElementById('container'),
-  clipboard: true,  // 剪切板
-  background: {
-    color: '#fffbe6', // 设置画布背景颜色
-  },
-  grid: {
-    size: 10,      // 网格大小 10px
-    visible: true, // 渲染网格背景
-  },
-  highlighting: {
-    magnetAvailable: magnetAvailabilityHighlighter,
-    magnetAdsorbed: {
-      name: 'stroke',
-      args: {
-        attrs: {
-          fill: '#fff',
-          stroke: '#31d0c6',
-        },
-      },
-    },
-  },
-  connecting: {
-    snap: true,
-    allowBlank: false,
-    allowLoop: false,
-    highlight: true,
-    connector: 'rounded',
-    connectionPoint: 'boundary',
-    router: {
-      name: 'er',
-      args: {
-        direction: 'V',
-      },
-    },
-    createEdge() {
-      return new Shape.Edge({
-        attrs: {
-          line: {
-            stroke: '#A2B1C3',
-            strokeWidth: 1,
-            targetMarker: {
-              name: 'classic',
-              size: 7,
-            },
-          },
-        },
-      })
-    },
-    validateConnection({ sourceView, targetView, targetMagnet }) {
-      if (!targetMagnet) {
-        return false
-      }
-
-      if (targetMagnet.getAttribute('port-group') !== 'in') {
-        return false
-      }
-
-      if (targetView) {
-        const node = targetView.cell
-        if (node instanceof MyShape) {
-          const portId = targetMagnet.getAttribute('port')
-          const usedInPorts = node.getUsedInPorts(graph)
-          if (usedInPorts.find((port) => port && port.id === portId)) {
-            return false
-          }
-        }
-      }
-
-      return true
-    },
-  },
-})
-
-const node = new MyShape()
-
-node.resize(120, 240).position(200, 50).updateInPorts(graph)
-graph.addNode(
-  node
-)
-
-graph.addNode(
-  new MyShape().resize(120, 360).position(400, 50).updateInPorts(graph),
-)
-
-graph.addNode(
-  new MyShape().resize(120, 360).position(300, 250).updateInPorts(graph),
-)
-
-function update(view) {
+function updateView(view) {
   const cell = view.cell
   if (cell instanceof MyShape) {
     cell.getInPorts().forEach((port) => {
       const portNode = view.findPortElem(port.id, 'portBody')
       view.unhighlight(portNode, {
-        highlighter: magnetAvailabilityHighlighter,
+        highlighter: {
+          name: 'stroke',
+          args: {
+            attrs: {
+              fill: '#fff',
+              stroke: '#47C769',
+            },
+          },
+        },
       })
     })
     cell.updateInPorts(graph)
@@ -233,10 +150,10 @@ function update(view) {
 
 graph.on('edge:connected', ({ previousView, currentView }) => {
   if (previousView) {
-    update(previousView)
+    updateView(previousView)
   }
   if (currentView) {
-    update(currentView)
+    updateView(currentView)
   }
 })
 
@@ -267,3 +184,30 @@ graph.on('edge:mouseenter', ({ edge }) => {
 graph.on('edge:mouseleave', ({ edge }) => {
   edge.removeTools()
 })
+
+
+
+const parent = graph.addNode({
+  x: 80,
+  y: 40,
+  width: 320,
+  height: 340,
+  zIndex: 1,
+  label: 'Parent\n(try to move me)',
+})
+
+const node = new MyShape()
+node.resize(120, 240).position(200, 50).updateInPorts(graph)
+// graph.addNode(node)
+parent.addChild(node)
+
+graph.addNode(
+  new MyShape().resize(120, 360).position(400, 50).updateInPorts(graph),
+)
+
+graph.addNode(
+  new MyShape().resize(120, 360).position(300, 250).updateInPorts(graph),
+)
+
+
+export { MyShape }
