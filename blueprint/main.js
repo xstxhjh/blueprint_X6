@@ -1,6 +1,8 @@
-const { Graph, Edge, Shape, NodeView } = window.X6
-
+const { Edge, Shape, NodeView } = window.X6
 import { graph } from './graph.js'
+
+const LINE_HEIGHT = 24
+const NODE_WIDTH = 150
 
 // 定义节点
 class MyShape extends Shape.Rect {
@@ -39,7 +41,7 @@ class MyShape extends Shape.Rect {
   }
 
   updateInPorts(graph) {
-    const minNumberOfPorts = 2
+    const minNumberOfPorts = 1
     const ports = this.getInPorts()
     const usedPorts = this.getUsedInPorts(graph)
     const newPorts = this.getNewInPorts(
@@ -91,7 +93,7 @@ MyShape.config({
     groups: { // 链接桩组定义
       in: {
         position: {
-          name: 'right',
+          name: 'left',
         },
         attrs: {
           portBody: {
@@ -105,7 +107,7 @@ MyShape.config({
       },
       out: {
         position: {
-          name: 'left',
+          name: 'right',
         },
         attrs: {
           portBody: {
@@ -187,27 +189,35 @@ graph.on('edge:mouseleave', ({ edge }) => {
 
 
 
-const parent = graph.addNode({
-  x: 80,
-  y: 40,
-  width: 320,
-  height: 340,
-  zIndex: 1,
-  label: 'Parent\n(try to move me)',
-})
+const createBox = (x = 80, y = 40)=>{
+  const parent = graph.addNode({
+    x: x,
+    y: y,
+    width: NODE_WIDTH,
+    height: LINE_HEIGHT * 3,
+    zIndex: 1,
+    attrs: { 
+      body: {
+        fill: '#2ECC71', // 背景颜色
+        stroke: '#000',  // 边框颜色
+      },
+      text: {
+        text: 'this is content text',
+        refY: 13,
+        fill: '#333',    // 文字颜色
+        fontSize: 13,    // 文字大小
+      },
+    },
+  })
+  
+  const node = new MyShape()
+  node.resize(NODE_WIDTH, LINE_HEIGHT).position(x, y + LINE_HEIGHT).updateInPorts(graph)
+  graph.addNode(node)
+  parent.addChild(node)
+  
+}
 
-const node = new MyShape()
-node.resize(120, 240).position(200, 50).updateInPorts(graph)
-// graph.addNode(node)
-parent.addChild(node)
-
-graph.addNode(
-  new MyShape().resize(120, 360).position(400, 50).updateInPorts(graph),
-)
-
-graph.addNode(
-  new MyShape().resize(120, 360).position(300, 250).updateInPorts(graph),
-)
+createBox()
 
 
 export { MyShape }

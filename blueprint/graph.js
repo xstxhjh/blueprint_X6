@@ -39,10 +39,7 @@ const graph = new Graph({
     connector: 'rounded',
     connectionPoint: 'boundary',
     router: {
-      name: 'er',
-      args: {
-        direction: 'V',
-      },
+      name: 'metro',
     },
     createEdge() {
       return new Shape.Edge({
