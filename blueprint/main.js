@@ -1,11 +1,11 @@
-const { Edge, Shape, NodeView } = window.X6
+const { Edge, Shape, Node } = window.X6
 import { graph } from './graph.js'
 
 const LINE_HEIGHT = 24
 const NODE_WIDTH = 150
 
 // 定义节点
-class MyShape extends Shape.Rect {
+class MyShape extends Shape.HTML {
   constructor(props) {
     super(props)
     this.keyName = 'MyShape'
@@ -70,7 +70,6 @@ class MyShape extends Shape.Rect {
 }
 
 MyShape.config({
-  label: 'hahaha',
   data: {
     disableMove: true
   },
@@ -196,27 +195,48 @@ const createBox = (x = 80, y = 40)=>{
     y: y,
     width: NODE_WIDTH,
     height: LINE_HEIGHT * 3,
-    zIndex: 1,
-    attrs: { 
-      body: {
-        fill: '#2ECC71', // 背景颜色
-        stroke: '#000',  // 边框颜色
-        strokeWidth: strokeWidth,
+    // attrs: { 
+    //   body: {
+    //     fill: '#2ECC71', // 背景颜色
+    //     stroke: '#000',  // 边框颜色
+    //     strokeWidth: strokeWidth,
+    //   },
+    //   text: {
+    //     text: 'this is content text',
+    //     refY: 13,
+    //     fill: '#333',    // 文字颜色
+    //     fontSize: 13,    // 文字大小
+    //   },
+    // },
+    shape: 'html',
+    html: {
+      render(node) {
+        const wrap = document.createElement('div')
+        wrap.style.width = '100%'
+        wrap.style.height = '100%'
+        wrap.style.background = '#f0f0f0'
+        wrap.style.display = 'flex'
+        wrap.style.justifyContent = 'center'
+        wrap.style.alignItems = 'center'
+    
+        wrap.innerText = 'Hello'
+        return wrap
       },
-      text: {
-        text: 'this is content text',
-        refY: 13,
-        fill: '#333',    // 文字颜色
-        fontSize: 13,    // 文字大小
-      },
+      shouldComponentUpdate(node) {
+        return true
+      }
     },
   })
   
   const node = new MyShape()
   node.resize(NODE_WIDTH - strokeWidth * 2, LINE_HEIGHT).position(x + strokeWidth, y + LINE_HEIGHT).updateInPorts(graph)
+  console.log(node.html)
+  node.id = 10
   graph.addNode(node)
   parent.addChild(node)
-  
+  console.log(node)
+
+  node.attr("body/html", "<div class='test-html'>hahhahahaah</div>");
 }
 
 createBox()

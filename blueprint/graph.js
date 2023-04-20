@@ -94,7 +94,6 @@ const graph = new Graph({
 	// 	},
 	// },
 	interacting: function (cellView){
-    console.log('cellView:', cellView.cell.getData())
     if(cellView.cell.getData() != undefined && cellView.cell.getData().disableMove){
       return { nodeMovable: false }
     }
