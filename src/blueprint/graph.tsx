@@ -1,9 +1,9 @@
-const { Graph, Shape } = window.X6
+import { Graph, Shape } from '@antv/x6'
 
+const initGraph = ()=> {
 // 画布
 const graph = new Graph({
-  container: document.getElementById('container'),
-  clipboard: true,  // 剪切板
+  container: document.getElementById('container') as any,
   background: {
     color: '#fffbe6', // 设置画布背景颜色
   },
@@ -55,7 +55,7 @@ const graph = new Graph({
         },
       })
     },
-    validateConnection({ sourceView, targetView, targetMagnet }) {
+    validateConnection({ sourceView, targetView, targetMagnet }: any) {
       if (!targetMagnet) {
         return false
       }
@@ -70,7 +70,7 @@ const graph = new Graph({
         if (node.keyName === 'keyName') {
           const portId = targetMagnet.getAttribute('port')
           const usedInPorts = node.getUsedInPorts(graph)
-          if (usedInPorts.find((port) => port && port.id === portId)) {
+          if (usedInPorts.find((port: { id: any }) => port && port.id === portId)) {
             return false
           }
         }
@@ -93,15 +93,17 @@ const graph = new Graph({
 	// 		return null
 	// 	},
 	// },
-	interacting: function (cellView){
+	interacting: function (cellView: any){
     if(cellView.cell.getData() != undefined && cellView.cell.getData().disableMove){
       return { nodeMovable: false }
     }
     return true
 	}
 })
- 
+	return graph
+}
+
 
 export {
-	graph
+	initGraph
 }
