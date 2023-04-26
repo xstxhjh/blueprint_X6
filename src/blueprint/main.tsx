@@ -5,7 +5,6 @@ import "./main.css";
 
 const LINE_HEIGHT = 36;
 const NODE_WIDTH = 150;
-const BORDER_WIDTH = 0.5;
 
 const registerPortNode = () => {
   const CustomPortComponent = ({ node }: { node: Node }) => {
@@ -16,8 +15,9 @@ const registerPortNode = () => {
     keyName: "custom-port-node",
     shape: "custom-port-node",
     component: CustomPortComponent,
-    width: NODE_WIDTH - BORDER_WIDTH * 2,
+    width: NODE_WIDTH,
     height: LINE_HEIGHT,
+		zIndex: 8,
     data: {
       disableMove: true,
     },
@@ -87,7 +87,7 @@ const registerGroupNode = () => {
     component: CustomGroupComponent,
     width: NODE_WIDTH,
     height: LINE_HEIGHT,
-    zIndex: 1,
+    zIndex: 8,
     attrs: {
       body: {
         fill: "#fffbe6",
@@ -172,7 +172,7 @@ const initBluePrint = () => {
     // graph.addNode(node)
 
     const node = graph.addNode({
-      x: x + BORDER_WIDTH,
+      x: x,
       y: y,
       shape: "custom-port-node",
     }) as any;
