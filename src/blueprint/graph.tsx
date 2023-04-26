@@ -5,7 +5,7 @@ const initGraph = ()=> {
 const graph = new Graph({
   container: document.getElementById('container') as any,
   background: {
-    color: '#fffbe6', // 设置画布背景颜色
+    color: '#fff', // 设置画布背景颜色
   },
   grid: {
     size: 10,      // 网格大小 10px

@@ -8,7 +8,7 @@ const NODE_WIDTH = 150
 
 const CustomComponent = ({ node }: { node: Node }) => {
 	return (
-		<div className="custom-react-node">hahaha</div>
+		<div className="custom-port-node">hahaha</div>
 	)
 }
 
@@ -16,8 +16,8 @@ const initBluePrint = () => {
 	const graph = initGraph()
 
 	const config = {
-		keyName: 'custom-react-node',
-		shape: 'custom-react-node',
+		keyName: 'custom-port-node',
+		shape: 'custom-port-node',
 		component: CustomComponent,
 		width: NODE_WIDTH,
 		height: LINE_HEIGHT,
@@ -85,7 +85,7 @@ const initBluePrint = () => {
 
 	function updateView(view: NodeView) {
 		const cell = view.cell as any
-		if (cell === 'custom-react-node') {
+		if (cell === 'custom-port-node') {
 			cell.getInPorts().forEach((port: any) => {
 				const portNode = view.findPortElem(port.id!, 'portBody')
 				view.unhighlight(portNode, {
@@ -119,7 +119,7 @@ const initBluePrint = () => {
 		}
 
 		const target = edge.getTargetCell() as any
-		if (target && target.keyName === 'custom-react-node') {
+		if (target && target.keyName === 'custom-port-node') {
 			target.updateInPorts(graph)
 		}
 	})
@@ -147,11 +147,10 @@ const initBluePrint = () => {
 		// node.resize(NODE_WIDTH, LINE_HEIGHT).position(x, y).updateInPorts(graph)
 		// graph.addNode(node)
 
-
 		const node = graph.addNode({
 			x: 120,
 			y: 50,
-			shape: 'custom-react-node',
+			shape: 'custom-port-node',
 		}) as any
 
 		node.getInPorts = function () {
