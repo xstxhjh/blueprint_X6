@@ -12,7 +12,6 @@ const registerPortNode = () => {
   };
 
   const config = {
-    keyName: "custom-port-node",
     shape: "custom-port-node",
     component: CustomPortComponent,
     width: NODE_WIDTH,
@@ -82,7 +81,6 @@ const registerGroupNode = () => {
   };
 
   const config = {
-    keyName: "custom-group-node",
     shape: "custom-group-node",
     component: CustomGroupComponent,
     width: NODE_WIDTH,

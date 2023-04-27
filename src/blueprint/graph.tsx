@@ -32,10 +32,14 @@ const graph = new Graph({
     },
   },
   connecting: {
-    snap: true,
-    allowBlank: false,
-    allowLoop: false,
-    highlight: true,
+    snap: true, // 吸附
+    allowBlank: false,  // 连接空白节点
+    allowLoop: false, // 同一循环节点
+    allowMulti: 'withPort', // 创建多个边
+    allowNode: false, // 连接节点
+    allowEdge: false, // 连接边
+    allowPort: true, // 连接桩
+    highlight: true,  // 
     connector: 'rounded',
     connectionPoint: 'boundary',
     router: {
@@ -60,19 +64,18 @@ const graph = new Graph({
         return false
       }
 
+      // 入口禁止创建连线
       if (targetMagnet.getAttribute('port-group') !== 'in') {
         return false
       }
 
       if (targetView) {
+        // 禁止修改入口的线
         const node = targetView.cell
-				console.log(node.keyName)
-        if (node.keyName === 'keyName') {
-          const portId = targetMagnet.getAttribute('port')
-          const usedInPorts = node.getUsedInPorts(graph)
-          if (usedInPorts.find((port: { id: any }) => port && port.id === portId)) {
-            return false
-          }
+        const portId = targetMagnet.getAttribute('port')
+        const usedInPorts = node.getUsedInPorts(graph)
+        if (usedInPorts.find((port: { id: any }) => port && port.id === portId)) {
+          return false
         }
       }
 
@@ -94,10 +97,13 @@ const graph = new Graph({
 	// 	},
 	// },
 	interacting: function (cellView: any){
-    if(cellView.cell.getData() != undefined && cellView.cell.getData().disableMove){
-      return { nodeMovable: false }
+    let opt: any = {
     }
-    return true
+    if(cellView.cell.getData() != undefined && cellView.cell.getData().disableMove){
+      opt.nodeMovable = false
+    }
+    
+    return opt
 	}
 })
 	return graph
